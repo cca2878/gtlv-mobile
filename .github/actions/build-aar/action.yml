@@ -1,0 +1,35 @@
+name: Build AAR
+description: Set up the toolchain (Go, JDK, Android SDK/NDK, gomobile) and run `gomobile bind` to produce gtlv.aar.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+        cache: true
+
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Set up Android SDK + NDK
+      uses: android-actions/setup-android@v4
+
+    - name: Install NDK
+      shell: bash
+      run: |
+        sdkmanager --install "ndk;26.3.11579264"
+        echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+
+    - name: Install gomobile
+      shell: bash
+      run: |
+        go install golang.org/x/mobile/cmd/gomobile@latest
+        go install golang.org/x/mobile/cmd/gobind@latest
+        gomobile init
+
+    - name: Build AAR
+      shell: bash
+      run: make bind-android

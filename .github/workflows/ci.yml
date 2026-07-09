@@ -29,3 +29,22 @@ jobs:
           cache: true
       - name: check (gofmt · vet · build)
         run: make check
+
+  # Full gomobile bind on every push/PR: this is where real breakage shows up
+  # (unbindable types, cgo/NDK cross-compile), which the pure-Go `check` job
+  # can't catch. The built AAR is uploaded as a workflow artifact so it can be
+  # pulled for on-device testing without cutting a release.
+  bind:
+    name: gomobile bind (AAR)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/build-aar
+      - name: Upload AAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: gtlv-aar-${{ github.sha }}
+          path: |
+            gtlv.aar
+            gtlv-sources.jar
+          if-no-files-found: error
