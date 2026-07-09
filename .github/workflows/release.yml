@@ -1,0 +1,52 @@
+name: Release AAR
+
+# On a version tag, build the Android AAR with gomobile and attach it to the
+# GitHub Release. This is the "wheel-like" distribution for Android consumers:
+# they add the AAR via Gradle and never install Go / gomobile / the NDK.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # create/upload release assets
+
+jobs:
+  aar:
+    name: gomobile bind → AAR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK + NDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install NDK
+        run: |
+          sdkmanager --install "ndk;26.3.11579264"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          gomobile init
+
+      - name: Build AAR
+        run: make bind-android
+
+      - name: Attach AAR to release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            gtlv.aar
+            gtlv-sources.jar

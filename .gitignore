@@ -1,0 +1,15 @@
+# gomobile build outputs
+/gtlv.aar
+/gtlv-sources.jar
+*.aar
+*.framework
+
+# build/bin
+/bin/
+/build/
+
+# editor/OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

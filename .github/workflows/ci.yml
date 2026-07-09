@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Cheap sanity: the wrapper is pure Go, so it compiles/vets against the upstream
+  # library without gomobile or the Android NDK. The heavy AAR build lives in
+  # release.yml (tag-triggered), since it needs the SDK/NDK and only matters on
+  # release.
+  check:
+    name: Go (vet · build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: check (gofmt · vet · build)
+        run: make check
