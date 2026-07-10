@@ -1,0 +1,33 @@
+name: Publish to GitHub Packages
+description: Deploy the already-built gtlv.aar (+ sources) to GitHub Packages Maven under com.cca2878:gtlv at the given version.
+
+inputs:
+  version:
+    description: Maven version to publish, e.g. 0.1.0 (release) or 0.1.0-SNAPSHOT (dev).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # setup-java writes ~/.m2/settings.xml with a server `github` whose creds come
+    # from the GITHUB_ACTOR / GITHUB_TOKEN env vars.
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: "17"
+        server-id: github
+
+    - name: mvn deploy:deploy-file
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        mvn --batch-mode deploy:deploy-file \
+          -DrepositoryId=github \
+          -Durl="https://maven.pkg.github.com/${{ github.repository }}" \
+          -DgroupId=com.cca2878 \
+          -DartifactId=gtlv \
+          -Dversion="${{ inputs.version }}" \
+          -Dpackaging=aar \
+          -Dfile=gtlv.aar \
+          -Dsources=gtlv-sources.jar

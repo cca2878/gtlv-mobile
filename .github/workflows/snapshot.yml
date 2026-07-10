@@ -1,0 +1,25 @@
+name: Snapshot AAR
+
+# On every push to dev, build the AAR and publish a rolling SNAPSHOT
+# com.cca2878:gtlv:<VERSION>-SNAPSHOT to GitHub Packages (Maven), so the Android
+# app can integrate the in-progress build via Gradle before a release is cut.
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: snapshot → GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/build-aar
+      - id: v
+        run: echo "version=$(cat VERSION)-SNAPSHOT" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/publish-packages
+        with:
+          version: ${{ steps.v.outputs.version }}
