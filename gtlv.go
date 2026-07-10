@@ -70,6 +70,34 @@ func (c *Client) GetValidate(gt, challenge string) (string, error) {
 	return c.v3.GetValidate(context.Background(), gt, challenge, c.solver)
 }
 
+// Pair is a (gt, challenge) captcha bootstrap pair. It exists only because
+// gomobile cannot bind a function returning two strings; the binding exposes it
+// as an opaque object with GetGt / GetChallenge accessors. The field is spelled
+// Gt (not GT) so the generated getter maps to a clean `gt` property on the
+// Java/Kotlin side.
+type Pair struct {
+	Gt        string
+	Challenge string
+}
+
+// Register fetches a throwaway (gt, challenge) pair from a public register
+// endpoint, for smoke-testing a new host integration (e.g. the Android probe):
+// call Register, then pass the pair to GetValidate. Pass an empty registerURL to
+// use the built-in public click-captcha endpoint.
+//
+// This talks to a live third-party endpoint and is a test convenience only —
+// real callers obtain gt/challenge from their own business backend instead.
+func Register(registerURL string) (*Pair, error) {
+	if registerURL == "" {
+		registerURL = client.BilibiliRegisterURL
+	}
+	gt, challenge, err := client.Register(context.Background(), nil, registerURL)
+	if err != nil {
+		return nil, err
+	}
+	return &Pair{Gt: gt, Challenge: challenge}, nil
+}
+
 // Close releases the underlying wasm runtime. The Client must not be used after
 // Close returns.
 func (c *Client) Close() error {
