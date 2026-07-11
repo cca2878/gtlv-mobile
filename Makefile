@@ -10,6 +10,12 @@ ANDROID_API := 21
 # gomobile appends the Go package name (gtlv) → final Java package com.cca2878.gtlv
 JAVAPKG := com.cca2878
 AAR := gtlv-mobile.aar
+# 16 KB page alignment: Android 15 (API 35) devices use 16 KB memory pages and
+# Google Play requires native libs to load on them. gomobile's libgojni.so is
+# linked by the NDK lld via cgo/JNI; NDK r26 defaults to 4 KB pages, so its LOAD
+# segments would be rejected on 16 KB-page devices. Pass max-page-size=16384 to
+# lld to align them. Drop this once the CI NDK is bumped to r28+ (16 KB by default).
+LDFLAGS := -extldflags=-Wl,-z,max-page-size=16384
 
 .PHONY: deps bind-android vet check clean help
 
@@ -22,7 +28,7 @@ deps:
 
 # Build the Android AAR (+ sources jar). Needs ANDROID_HOME and an NDK.
 bind-android:
-	$(GOMOBILE) bind -target=$(ANDROID_TARGETS) -androidapi $(ANDROID_API) -javapkg=$(JAVAPKG) -o $(AAR) .
+	$(GOMOBILE) bind -target=$(ANDROID_TARGETS) -androidapi $(ANDROID_API) -javapkg=$(JAVAPKG) -ldflags="$(LDFLAGS)" -o $(AAR) .
 	@echo "built $(AAR)"
 
 # Native sanity (no gomobile/NDK needed): does the wrapper compile against the
