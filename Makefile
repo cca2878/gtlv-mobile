@@ -9,7 +9,7 @@ ANDROID_TARGETS := android/arm64,android/amd64
 ANDROID_API := 21
 # gomobile appends the Go package name (gtlv) → final Java package com.cca2878.gtlv
 JAVAPKG := com.cca2878
-AAR := gtlv.aar
+AAR := gtlv-mobile.aar
 
 .PHONY: deps bind-android vet check clean help
 
@@ -33,7 +33,7 @@ check vet:
 	go build ./...
 
 clean:
-	rm -f $(AAR) gtlv-sources.jar
+	rm -f $(AAR) gtlv-mobile-sources.jar
 
 help:
 	@echo "  deps          安装 gomobile/gobind（需已装 Android SDK+NDK）"

@@ -46,8 +46,8 @@ jobs:
       - name: Upload AAR artifact
         uses: actions/upload-artifact@v7
         with:
-          name: gtlv-aar-${{ github.sha }}
+          name: gtlv-mobile-aar-${{ github.sha }}
           path: |
-            gtlv.aar
-            gtlv-sources.jar
+            gtlv-mobile.aar
+            gtlv-mobile-sources.jar
           if-no-files-found: error

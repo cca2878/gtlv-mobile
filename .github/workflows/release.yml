@@ -1,7 +1,7 @@
 name: Release AAR
 
 # On a version tag (on main), build the AAR and publish an immutable release
-# version com.cca2878:gtlv:<tag without v> to GitHub Packages (Maven).
+# version io.github.cca2878:gtlv-mobile:<tag without v> to GitHub Packages (Maven).
 on:
   push:
     tags: ["v*"]

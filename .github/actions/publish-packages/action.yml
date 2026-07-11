@@ -1,5 +1,5 @@
 name: Publish to GitHub Packages
-description: Deploy the already-built gtlv.aar (+ sources) to GitHub Packages Maven under com.cca2878:gtlv at the given version.
+description: Deploy the already-built gtlv-mobile.aar (+ sources) to GitHub Packages Maven under io.github.cca2878:gtlv-mobile at the given version.
 
 inputs:
   version:
@@ -25,9 +25,9 @@ runs:
         mvn --batch-mode deploy:deploy-file \
           -DrepositoryId=github \
           -Durl="https://maven.pkg.github.com/${{ github.repository }}" \
-          -DgroupId=com.cca2878 \
-          -DartifactId=gtlv \
+          -DgroupId=io.github.cca2878 \
+          -DartifactId=gtlv-mobile \
           -Dversion="${{ inputs.version }}" \
           -Dpackaging=aar \
-          -Dfile=gtlv.aar \
-          -Dsources=gtlv-sources.jar
+          -Dfile=gtlv-mobile.aar \
+          -Dsources=gtlv-mobile-sources.jar

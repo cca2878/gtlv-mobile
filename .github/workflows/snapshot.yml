@@ -1,7 +1,7 @@
 name: Snapshot AAR
 
 # On every push to dev, build the AAR and publish a rolling SNAPSHOT
-# com.cca2878:gtlv:<VERSION>-SNAPSHOT to GitHub Packages (Maven), so the Android
+# io.github.cca2878:gtlv-mobile:<VERSION>-SNAPSHOT to GitHub Packages (Maven), so the Android
 # app can integrate the in-progress build via Gradle before a release is cut.
 on:
   push:
