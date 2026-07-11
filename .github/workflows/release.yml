@@ -1,45 +1,24 @@
 name: Release AAR
 
-# On a version tag, build the Android AAR with gomobile and publish it to
-# GitHub Packages (Maven) under clean coordinates com.cca2878:gtlv:<version>,
-# so Android consumers pull it as a normal Gradle dependency.
+# On a version tag (on main), build the AAR and publish an immutable release
+# version io.github.cca2878:gtlv-mobile:<tag without v> to GitHub Packages (Maven).
 on:
   push:
     tags: ["v*"]
 
 permissions:
   contents: read
-  packages: write # publish to GitHub Packages
+  packages: write
 
 jobs:
   publish:
-    name: gomobile bind → GitHub Packages
+    name: release → GitHub Packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
-      # Build gtlv.aar (+ gtlv-sources.jar) via the shared composite action.
       - uses: ./.github/actions/build-aar
-
-      # Configure Maven auth to GitHub Packages. setup-java writes ~/.m2/settings.xml
-      # with a server `github` whose creds come from GITHUB_ACTOR / GITHUB_TOKEN.
-      - uses: actions/setup-java@v5
+      - id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/publish-packages
         with:
-          distribution: temurin
-          java-version: "17"
-          server-id: github
-
-      - name: Publish AAR to GitHub Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          mvn --batch-mode deploy:deploy-file \
-            -DrepositoryId=github \
-            -Durl="https://maven.pkg.github.com/${{ github.repository }}" \
-            -DgroupId=com.cca2878 \
-            -DartifactId=gtlv \
-            -Dversion="${version}" \
-            -Dpackaging=aar \
-            -Dfile=gtlv.aar \
-            -Dsources=gtlv-sources.jar
+          version: ${{ steps.v.outputs.version }}

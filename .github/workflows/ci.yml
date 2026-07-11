@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main] # dev = snapshot verification; main = formal (post-merge)
   pull_request:
-    branches: [main]
+    branches: [main] # gate the dev -> main PR
 
 permissions:
   contents: read
@@ -34,8 +34,11 @@ jobs:
   # (unbindable types, cgo/NDK cross-compile), which the pure-Go `check` job
   # can't catch. The built AAR is uploaded as a workflow artifact so it can be
   # pulled for on-device testing without cutting a release.
+  # Full AAR compile as verification on main pushes and PRs. On dev the snapshot
+  # workflow already builds and publishes, so skip here to avoid a double build.
   bind:
     name: gomobile bind (AAR)
+    if: github.ref != 'refs/heads/dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -43,8 +46,8 @@ jobs:
       - name: Upload AAR artifact
         uses: actions/upload-artifact@v7
         with:
-          name: gtlv-aar-${{ github.sha }}
+          name: gtlv-mobile-aar-${{ github.sha }}
           path: |
-            gtlv.aar
-            gtlv-sources.jar
+            gtlv-mobile.aar
+            gtlv-mobile-sources.jar
           if-no-files-found: error

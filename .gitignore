@@ -1,6 +1,6 @@
 # gomobile build outputs
-/gtlv.aar
-/gtlv-sources.jar
+/gtlv-mobile.aar
+/gtlv-mobile-sources.jar
 *.aar
 *.framework
 

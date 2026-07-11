@@ -1,5 +1,5 @@
 name: Build AAR
-description: Set up the toolchain (Go, JDK, Android SDK/NDK, gomobile) and run `gomobile bind` to produce gtlv.aar.
+description: Set up the toolchain (Go, JDK, Android SDK/NDK, gomobile) and run `gomobile bind` to produce gtlv-mobile.aar.
 
 runs:
   using: composite
