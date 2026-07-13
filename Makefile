@@ -17,6 +17,14 @@ AAR := gtlv-mobile.aar
 # lld to align them. Drop this once the CI NDK is bumped to r28+ (16 KB by default).
 LDFLAGS := -extldflags=-Wl,-z,max-page-size=16384
 
+# STRIP=true appends -s -w to strip Go's symbol table + DWARF. The consuming app's
+# AGP/NDK strip only erases standard ELF symbols and cannot touch Go's own pclntab/
+# symbol metadata, so a Release artifact still needs -s -w here to actually shrink;
+# SNAPSHOT/PR CI keeps symbols for diagnosis. Only release CI passes STRIP=true.
+ifeq ($(STRIP),true)
+LDFLAGS := -s -w $(LDFLAGS)
+endif
+
 .PHONY: deps bind-android vet check clean help
 
 # Install the gomobile toolchain. Requires the Android SDK + NDK already present
@@ -27,8 +35,10 @@ deps:
 	$(GOMOBILE) init
 
 # Build the Android AAR (+ sources jar). Needs ANDROID_HOME and an NDK.
+# -trimpath drops absolute build paths from the binary (reproducibility; no path
+# leakage). Enabled on every bind / all CIs.
 bind-android:
-	$(GOMOBILE) bind -target=$(ANDROID_TARGETS) -androidapi $(ANDROID_API) -javapkg=$(JAVAPKG) -ldflags="$(LDFLAGS)" -o $(AAR) .
+	$(GOMOBILE) bind -trimpath -target=$(ANDROID_TARGETS) -androidapi $(ANDROID_API) -javapkg=$(JAVAPKG) -ldflags="$(LDFLAGS)" -o $(AAR) .
 	@echo "built $(AAR)"
 
 # Native sanity (no gomobile/NDK needed): does the wrapper compile against the
